@@ -1,0 +1,38 @@
+.successIcon  {
+    path {
+      stroke: var(--save-redesigned);
+    }
+    border-left: 1px solid var(--accent-redesigned);
+}
+
+.deleteIcon {
+    path {
+      stroke: var(--cancel-redesigned);
+    }
+    border-left: 1px solid var(--accent-redesigned);
+}
+
+.done {
+  text-decoration: line-through;
+
+  .successIcon  {
+    path {
+      stroke: var(--icon-redesigned);
+    }
+  }
+}
+
+.editIconInput {
+    path {
+      fill: var(--save-redesigned);
+    }
+}
+
+.undone {
+  .editIcon {
+    path {
+      fill: var(--save-redesigned);
+    }
+    border-left: 1px solid var(--accent-redesigned);
+  }
+}

@@ -8,12 +8,12 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '@/shared/ui/Input';
 import ArrowDown from '@/shared/assets/icons/arrow-bottom.svg';
 import defaultTodos from '@/shared/mock/defaultTodos';
-import SuccessIcon from '@/shared/assets/icons/done-20-20.svg';
 import Icon from '@/shared/ui/Icon';
 import IToDo from '@/entities/ToDo/model/types/IToDo';
 import Button from '@/shared/ui/Button';
 import { toDoStatus } from '@/entities/ToDo/model/types/toDoStatus';
 import { ITabItem, Tabs } from '@/shared/ui/Tabs';
+import ToDoTab from '@/entities/ToDo';
 
 type toDoQuery = toDoStatus | 'all';
 
@@ -75,7 +75,10 @@ const ToDoList: React.FC<IToDoListProps> = ({
     }, [toDo, sortQuery]);
 
     const editStatusToDo = useCallback((item: IToDo) => {
-        const doneItem: IToDo = { ...item, status: 'done' };
+        const doneItem: IToDo = {
+            ...item,
+            status: item.status == 'done' ? 'undone' : 'done',
+        };
         setToDo((prevState) => {
             const newToDos = [...prevState].filter(
                 (item: IToDo) => item.id != doneItem.id,
@@ -88,19 +91,68 @@ const ToDoList: React.FC<IToDoListProps> = ({
         });
     }, []);
 
+    const editFormTodo = useCallback((item: IToDo) => {
+        const doneItem: IToDo = {
+            ...item,
+            form: item.form == 'normal' ? 'edit' : 'normal',
+        };
+        setToDo((prevState) => {
+            const newToDos = [...prevState].filter(
+                (item: IToDo) => item.id != doneItem.id,
+            );
+            localStorage.setItem(
+                'todos',
+                JSON.stringify([...newToDos, doneItem]),
+            );
+            return [...newToDos, doneItem];
+        });
+    }, []);
+
+    const editValueToDo = useCallback(
+        (item: IToDo, value: string) => {
+            const doneItem: IToDo = {
+                ...item,
+                value: value,
+            };
+            setToDo((prevState) => {
+                const newToDos = [...prevState].filter(
+                    (item: IToDo) => item.id != doneItem.id,
+                );
+                localStorage.setItem(
+                    'todos',
+                    JSON.stringify([...newToDos, doneItem]),
+                );
+                return [...newToDos, doneItem];
+            });
+            editFormTodo(doneItem);
+        },
+        [editFormTodo],
+    );
+
     const addToDo = useCallback(
         (valueInput: string) => {
             const newItem: IToDo = {
                 id: toDo[toDo.length - 1].id + 1,
                 value: valueInput,
                 status: 'undone',
+                form: 'normal',
             };
             setToDo((prevState) => [...prevState, newItem]);
             setValueInput('');
             localStorage.setItem('todos', JSON.stringify([...toDo, newItem]));
         },
-        [valueInput, toDo],
+        [toDo],
     );
+
+    const deleteToDo = useCallback((item: IToDo) => {
+        setToDo((prevState) => {
+            const newTodos = [...prevState].filter((todo: IToDo) => {
+                return item.id !== todo.id;
+            });
+            localStorage.setItem('todos', JSON.stringify([...newTodos]));
+            return [...newTodos];
+        });
+    }, []);
 
     const setTabSort = useCallback((tab: ITabItem) => {
         setSortQuery(tab.value as toDoQuery);
@@ -128,28 +180,14 @@ const ToDoList: React.FC<IToDoListProps> = ({
                     </Button>
                 </HStack>
                 {sortedToDo.map((item: IToDo) => (
-                    <Card
-                        className={
-                            item.status == 'undone' ? cls.undone : cls.done
-                        }
+                    <ToDoTab
                         key={item.id}
-                        max
-                        variant={item.status == 'undone' ? 'outline' : 'accept'}
-                    >
-                        <HStack gap={'16'} max justify={'between'}>
-                            {item.value}
-                            {item.status == 'undone' && (
-                                <VStack>
-                                    <Icon
-                                        onClick={() => editStatusToDo(item)}
-                                        Svg={SuccessIcon}
-                                        clickable
-                                    />
-                                </VStack>
-                            )}
-                            {/*{item.status == 'done' && }*/}
-                        </HStack>
-                    </Card>
+                        item={item}
+                        deleteHandle={deleteToDo}
+                        editHandle={editFormTodo}
+                        acceptEditHandle={editValueToDo}
+                        editStatusHandle={editStatusToDo}
+                    />
                 ))}
             </VStack>
             <HStack className={cls.options} max gap={'16'} justify={'between'}>
