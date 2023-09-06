@@ -83,9 +83,13 @@ npm run test:e2e - тестирование по Cypress(e2e)
 ## Обзор компонентов и функционала
 
 Основной компонент widget [ToDoList.tsx](https://github.com/l1msn/todo/blob/master/src/widgets/ToDoList/ui/ToDoList.tsx)
+
 Ячейки ToDoList'а [ToDoTab.tsx](https://github.com/l1msn/todo/blob/master/src/entities/ToDo/ui/ToDoTab/ToDoTab.tsx)
+
 Тестирование Jest\RTL(unit,int) [ToDoList.test.tsx](https://github.com/l1msn/todo/blob/master/src/widgets/ToDoList/ui/ToDoList.test.tsx)
+
 Тестирование Cypress(e2e) [todolist.cy.ts](https://github.com/l1msn/todo/blob/master/cypress/e2e/todolist.cy.ts)
+
 Внутри этих компонентов имеются комментарии
 
 Данные todo'шки сохраняются в localStorage(в ТЗ не указан никакой StateManager\DB).
