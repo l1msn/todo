@@ -21,6 +21,9 @@ const mapPaddingToClass: Record<CardPadding, string> = {
     '24': 'gap_24',
 };
 
+/**
+ * @description Компонент закругленной карточки для контента
+ */
 const Card: React.FC<ICardProps> = memo((props: ICardProps): JSX.Element => {
     const {
         className,

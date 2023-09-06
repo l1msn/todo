@@ -4,6 +4,9 @@ import IFlexProps from '../Flex/types/IFlexProps';
 
 type IVStackProps = Omit<IFlexProps, 'direction'>;
 
+/**
+ * @description Компонент вертикального контента с кастомным позиционированием
+ */
 const VStack: React.FC<IVStackProps> = (props: IVStackProps): JSX.Element => {
     const { align = 'start' } = props;
 

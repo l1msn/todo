@@ -1,20 +1,17 @@
 import React, { JSX, useEffect, useMemo, useState } from 'react';
 import Themes from '@/shared/consts/theme';
 import { ThemeContext } from '@/shared/lib/context/ThemeContext';
-import {LOCAL_STORAGE_THEME_KEY} from "@/shared/consts/localStorage";
+import { LOCAL_STORAGE_THEME_KEY } from '@/shared/consts/localStorage';
 
 interface IThemeProviderProps {
     children?: React.ReactNode;
     initialTheme?: Themes;
 }
 
-
 const ThemeProvider: React.FC<IThemeProviderProps> = (props): JSX.Element => {
     const { initialTheme, children } = props;
 
-    const [theme, setTheme] = useState<Themes>(
-        initialTheme || Themes.DARK,
-    );
+    const [theme, setTheme] = useState<Themes>(initialTheme || Themes.DARK);
     const [isThemeInit, setIsThemeInit] = useState<boolean>(false);
 
     useEffect(() => {

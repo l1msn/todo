@@ -1,4 +1,3 @@
-interface IStateSchema {
-}
+interface IStateSchema {}
 
 export default IStateSchema;

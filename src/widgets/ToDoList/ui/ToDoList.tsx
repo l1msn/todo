@@ -1,4 +1,4 @@
-import React, { JSX, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { JSX, useEffect, useState } from 'react';
 import classNames from '@/shared/lib/classNames/classNames';
 import cls from './ToDoList.module.scss';
 import { Card } from '@/shared/ui/Card';
@@ -11,30 +11,32 @@ import defaultTodos from '@/shared/mock/defaultTodos';
 import Icon from '@/shared/ui/Icon';
 import IToDo from '@/entities/ToDo/model/types/IToDo';
 import Button from '@/shared/ui/Button';
-import { toDoStatus } from '@/entities/ToDo/model/types/toDoStatus';
-import { ITabItem, Tabs } from '@/shared/ui/Tabs';
+import { Tabs } from '@/shared/ui/Tabs';
 import ToDoTab from '@/entities/ToDo';
-
-type toDoQuery = toDoStatus | 'all';
+import { toDoQuery } from '@/entities/ToDo/model/types/toDoQuery';
+import useToDoTabs from '@/entities/ToDo/model/lib/hooks/useToDoTabs';
+import useTypeTabs from '@/entities/ToDo/model/lib/hooks/useTypeTabs';
 
 interface IToDoListProps {
     className?: string;
 }
 
-interface IToDoQueryTabs {
-    value: toDoQuery;
-    content: string;
-}
-
 const ToDoList: React.FC<IToDoListProps> = ({
     className,
 }: IToDoListProps): JSX.Element => {
+    // i18n для локализации
     const { t } = useTranslation();
 
+    // состояние компонента для списка дел
     const [toDo, setToDo] = useState<IToDo[]>([]);
+    // состояние компонента для отслеживания значения в input'e
     const [valueInput, setValueInput] = useState<string>('');
+    // состояние компонента для отслеживания типа сортировки
     const [sortQuery, setSortQuery] = useState<toDoQuery>('all');
 
+    // инициализация списка дел
+    // при отстусвие в localStorage данных, туда помещаются моковые данные
+    // иначе берутся готовые с localStorage
     useEffect(() => {
         if (localStorage.getItem('todos')) {
             const todos = localStorage.getItem('todos') as string;
@@ -45,123 +47,24 @@ const ToDoList: React.FC<IToDoListProps> = ({
         }
     }, []);
 
-    const typeTabs = useMemo<IToDoQueryTabs[]>(
-        () => [
-            {
-                value: 'all',
-                content: t('all'),
-            },
-            {
-                value: 'done',
-                content: t('done'),
-            },
-            {
-                value: 'undone',
-                content: t('undone'),
-            },
-        ],
-        [t],
-    );
+    // получаения с хука логики взаимодействия со списком дел
+    const {
+        sortedToDo,
+        addToDo,
+        editStatusToDo,
+        editValueToDo,
+        editFormTodo,
+        deleteToDo,
+    } = useToDoTabs({ toDo, setToDo, sortQuery, setValueInput });
 
-    const sortedToDo = useMemo(() => {
-        if (sortQuery == 'all') {
-            return toDo;
-        } else {
-            const sotredTodos = toDo.filter(
-                (item: IToDo) => item.status == sortQuery,
-            );
-            return sotredTodos;
-        }
-    }, [toDo, sortQuery]);
-
-    const editStatusToDo = useCallback((item: IToDo) => {
-        const doneItem: IToDo = {
-            ...item,
-            status: item.status == 'done' ? 'undone' : 'done',
-        };
-        setToDo((prevState) => {
-            const newToDos = [...prevState].filter(
-                (item: IToDo) => item.id != doneItem.id,
-            );
-            localStorage.setItem(
-                'todos',
-                JSON.stringify([...newToDos, doneItem]),
-            );
-            return [...newToDos, doneItem];
-        });
-    }, []);
-
-    const editFormTodo = useCallback((item: IToDo) => {
-        const doneItem: IToDo = {
-            ...item,
-            form: item.form == 'normal' ? 'edit' : 'normal',
-        };
-        setToDo((prevState) => {
-            const newToDos = [...prevState].filter(
-                (item: IToDo) => item.id != doneItem.id,
-            );
-            localStorage.setItem(
-                'todos',
-                JSON.stringify([...newToDos, doneItem]),
-            );
-            return [...newToDos, doneItem];
-        });
-    }, []);
-
-    const editValueToDo = useCallback(
-        (item: IToDo, value: string) => {
-            const doneItem: IToDo = {
-                ...item,
-                value: value,
-            };
-            setToDo((prevState) => {
-                const newToDos = [...prevState].filter(
-                    (item: IToDo) => item.id != doneItem.id,
-                );
-                localStorage.setItem(
-                    'todos',
-                    JSON.stringify([...newToDos, doneItem]),
-                );
-                return [...newToDos, doneItem];
-            });
-            editFormTodo(doneItem);
-        },
-        [editFormTodo],
-    );
-
-    const addToDo = useCallback(
-        (valueInput: string) => {
-            const newItem: IToDo = {
-                id: toDo[toDo.length - 1].id + 1,
-                value: valueInput,
-                status: 'undone',
-                form: 'normal',
-            };
-            setToDo((prevState) => [...prevState, newItem]);
-            setValueInput('');
-            localStorage.setItem('todos', JSON.stringify([...toDo, newItem]));
-        },
-        [toDo],
-    );
-
-    const deleteToDo = useCallback((item: IToDo) => {
-        setToDo((prevState) => {
-            const newTodos = [...prevState].filter((todo: IToDo) => {
-                return item.id !== todo.id;
-            });
-            localStorage.setItem('todos', JSON.stringify([...newTodos]));
-            return [...newTodos];
-        });
-    }, []);
-
-    const setTabSort = useCallback((tab: ITabItem) => {
-        setSortQuery(tab.value as toDoQuery);
-    }, []);
+    // получаения с хука логики сортировки списка дел
+    const { setTabSort, typeTabs } = useTypeTabs(setSortQuery);
 
     return (
         <Card
             className={classNames(cls.toDoList, {}, [className])}
             padding={'16'}
+            data-testid={'todolist'}
         >
             <VStack gap={'16'} align={'center'} max justify={'center'}>
                 <Text align={'center'} bold size={'l'} title={t('ToDoList')} />
@@ -171,15 +74,18 @@ const ToDoList: React.FC<IToDoListProps> = ({
                         onChange={setValueInput}
                         placeholder={t('Write ToDo')}
                         addonLeft={<Icon Svg={ArrowDown} />}
+                        data-testid={`todolist.input`}
                     />
                     <Button
                         variant={'accept'}
                         onClick={() => addToDo(valueInput)}
+                        data-testid={`todolist.addBtn`}
                     >
                         {t('Add')}
                     </Button>
                 </HStack>
                 {sortedToDo.map((item: IToDo) => (
+                    // отрисовка списка дел
                     <ToDoTab
                         key={item.id}
                         item={item}
@@ -193,6 +99,7 @@ const ToDoList: React.FC<IToDoListProps> = ({
             <HStack className={cls.options} max gap={'16'} justify={'between'}>
                 <Text text={`${t('Count')}: ${sortedToDo.length}`} />
                 <Tabs
+                    data-testid={'tab'}
                     tabs={typeTabs}
                     onTabClick={setTabSort}
                     value={sortQuery}

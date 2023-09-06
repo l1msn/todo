@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import LangButton from '../consts/LangButton';
 import RuIcon from '@/shared/assets/icons/lang-ru.svg';
 import EnIcon from '@/shared/assets/icons/lang-en.svg';
-import Icon from "@/shared/ui/Icon";
+import Icon from '@/shared/ui/Icon';
 
 interface ILangSwitcherProps {
     className?: string;

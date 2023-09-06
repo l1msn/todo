@@ -3,7 +3,7 @@ import cls from './ThemeSwitcher.module.scss';
 import SwitchIcon from '@/shared/assets/icons/theme.svg';
 import useTheme from '@/shared/lib/hooks/useTheme/useTheme';
 import useAppDispatch from '@/shared/lib/hooks/useAppDispatch/useAppDispatch';
-import Icon from "@/shared/ui/Icon";
+import Icon from '@/shared/ui/Icon';
 
 interface IThemeSwitcherProps {
     className?: string;
